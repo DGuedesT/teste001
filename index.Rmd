@@ -1,0 +1,100 @@
+---
+title: "Retorno por data de aplicação"
+subtitle: "Janeiro/2022"
+author: ""
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE)
+```
+
+class: center, middle
+
+# Investimentos Estruturados 
+
+
+```{r 1, message=FALSE, echo=FALSE,,warning=FALSE}
+library(knitr)
+library(readxl)
+library(ggplot2)
+library(tidyverse)
+library(plotly)
+
+setwd("C:\\Users\\Denilson\\Desktop\\Retorno\\base")
+
+for (i in 1:12) {
+
+  assign(list.files()[i],
+         read_xlsx(list.files()[i],
+                   col_types = c("date","numeric" ,"numeric","numeric","numeric","numeric","numeric","numeric")))
+  
+  assign(paste("g.",list.files()[i],sep=""),
+         get(list.files()[i])%>%gather(indices,Retorno , -...1)%>%mutate(Data=as.Date(...1))%>%
+           ggplot( aes(x = Data, y = Retorno, color = indices, group = indices)) +
+           geom_line(size=1) +
+           labs(title = paste("De",min(get(list.files()[i])$...1),"até",max(max(get(list.files()[i])$...1))))+
+           theme(legend.position = "bottom", legend.title = element_blank())+
+           scale_y_continuous("Retorno (em %)") +
+           scale_x_date("Data", date_labels = "%m/%y", date_breaks = "6 month")+
+           scale_color_brewer(palette = 'Dark2'))
+
+  }
+
+rm(i)
+
+ggplot_Estr= list("Ibiúna Hedge STH"=g.IBIUNA.xlsx,
+                  "GAP Absoluto"=g.GAP.xlsx,
+                  "Novus Macro"=g.NOVUS.xlsx,
+                  "Bahia AM Maraú"=g.BAHIA.xlsx,
+                  "Bahia AM Maraú Estruturado"=g.BAHIAESTR.xlsx,
+                  "Absolute Vertex II"=g.ABSOLUTE.xlsx)
+
+ggplot_RV= list("Neo Navitas"=g.NEO.xlsx,
+                "NAVI Institucional"=g.NAVI.xlsx,
+                "VINCI MOSAICO"=g.VINCI.xlsx,
+                "Constellation Institucional Advisory"=g.CONST.xlsx,
+                "Moat Capital"=g.MOAT.xlsx,
+                "Bradesco Selection"=g.BRADESCO.xlsx)
+
+```
+
+```{r create-markdown-chunks-dynamically, include=FALSE}
+
+library(magrittr)
+
+out = NULL
+for (p_name in names(ggplot_Estr)) {
+  knit_expanded <- paste0("\n\n---\n## Retorno ", p_name, "\n\n```{r results='asis', echo=FALSE, warning=FALSE,out.width = '800px', message=FALSE}\n\nggplotly(ggplot_Estr[['", p_name, "']])%>%layout(legend = list(orientation = 'h', x = 0.1, y = -0.2))\n\n```")
+  out = c(out, knit_expanded)
+}
+```
+
+<!--- knit those table chunk statements --> 
+`r paste(knit(text = out), collapse = '\n')`
+
+
+---
+class: center, middle
+
+# Renda Variável
+
+```{r create-markdown-chunks-dynamicall, include=FALSE}
+
+library(magrittr)
+
+out = NULL
+for (p_name in names(ggplot_RV)) {
+  knit_expanded <- paste0("\n\n---\n## Retorno ", p_name, "\n\n```{r results='asis', echo=FALSE, warning=FALSE,out.width = '800px', message=FALSE}\n\nggplotly(ggplot_RV[['", p_name, "']])%>%layout(legend = list(orientation = 'h', x = 0.1, y = -0.2))\n\n```")
+  out = c(out, knit_expanded)
+}
+```
+
+<!--- knit those table chunk statements --> 
+`r paste(knit(text = out), collapse = '\n')`
